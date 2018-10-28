@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>auv_main</name>
-  <version>0.0.0</version>
-  <description>The auv_main package</description>
+  <version>1.0.0</version>
+  <description>AUV ROS Main Package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
   <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
-  <maintainer email="dan@todo.todo">dan</maintainer>
+  <maintainer email="fostirop@usc.edu">Iordanis Fostiropoulos</maintainer>
 
 
   <!-- One license tag required, multiple allowed, one license per tag -->
@@ -19,13 +19,13 @@
   <!-- Url tags are optional, but multiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/auv_main</url> -->
+  <url type="website">http://uscauv.com</url> -->
 
 
   <!-- Author tags are optional, multiple are allowed, one per tag -->
   <!-- Authors do not have to be maintainers, but could be -->
   <!-- Example: -->
-  <!-- <author email="jane.doe@example.com">Jane Doe</author> -->
+  <author email="fostirop@usc.edu">Iordanis Fostiropoulos</author> -->
 
 
   <!-- The *depend tags are used to specify dependencies -->
