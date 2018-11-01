@@ -9,4 +9,10 @@ Package Folder `src/auv_main`
 
 Create your code and main logic as a seperate package that we can install on jetson or include with the ROS build-file.
 
-Use ROS to communicate with your package's library main functionality. Keep things modular. 
+Use ROS to communicate with your package's library main functionality. Keep things modular.
+
+
+
+**Sister Module** https://github.com/USCAUV-Embedded-Systems/uscauv-ros-drivers
+
+To build, catkin_make in the ros.main folder
