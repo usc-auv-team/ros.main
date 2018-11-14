@@ -1,0 +1,3 @@
+float32 depth_meters
+float32 yaw_degrees
+float32 motor_percent
