@@ -1,3 +1,3 @@
-float32 depth_meters
-float32 yaw_degrees
-float32 motor_percent
+float32 desired_delta_depth_meters
+float32 desired_degrees_yaw
+float32 desired_percent_speed

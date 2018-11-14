@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+#TODO can I delete this file
+
 from distutils.core import setup
 from catkin_pkg.python_setup import generate_distutils_setup
 
