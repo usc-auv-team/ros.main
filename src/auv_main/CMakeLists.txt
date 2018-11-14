@@ -51,7 +51,6 @@ catkin_python_setup()
 add_message_files(
   FILES
   desired_motion.msg
-  log.msg
   vision_suite.msg
   world_coordinates.msg
   world_heading.msg
