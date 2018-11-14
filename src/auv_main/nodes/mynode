@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+
+from auv_main.msg import world_coordinates
+
+print('testing worked!')
+
 class Visualizer(object):
     def __init__(self):
         import cv2
@@ -44,7 +50,6 @@ def main(simulating = False):
         from main_module.gyro.ros_gyro import ROS_Gyro as Gyro
         from main_module.odometer.ros_odometer import ROS_Odometer as Odometer
         from main_module.propulsion.robot2018 import Robot2018 as Propulsion
-
 
 if __name__ == '__main__':
     main(simulating = True)
