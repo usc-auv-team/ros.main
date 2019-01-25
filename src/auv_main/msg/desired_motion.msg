@@ -1,0 +1,3 @@
+float32 desired_delta_depth_meters
+float32 desired_degrees_yaw
+float32 desired_percent_speed

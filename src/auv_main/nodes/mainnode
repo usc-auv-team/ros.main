@@ -1,0 +1,39 @@
+#!/usr/bin/env python
+
+def main():
+    import rospy
+    import auv_main.msg as messages
+
+    from main_module.gyro.ros_middleman import Middleman as Gyro
+    from main_module.odometer.ros_middleman import Middleman as Odometer
+    from main_module.propulsion.ros_middleman import Middleman as Propulsion
+    from main_module.planning.s2018 import coach
+
+    gyro = Gyro()
+    odometer = Odometer()
+    propulsion = Propulsion(gyro)
+
+    strategy = coach.list_of_strategies()[2]
+    strategy = coach.initialize(strategy, gyro, odometer)
+
+    rospy.init_node('main_module', anonymous = False)
+    rospy.Subscriber('imu_heading', messages.world_heading, gyro.callback)
+    rospy.Subscriber('imu_xyz', messages.world_coordinates, odometer.callback)
+    pub = rospy.Publisher('propulsion', messages.desired_motion, queue_size = 10)
+    # rospy.wait_for_service('turtle_motion')
+    # set_propulsion_to = rospy.ServiceProxy('turtle_motion', messages.desired_motion)
+
+    rate = rospy.Rate(10)# Hz
+
+    while not rospy.is_shutdown():
+        strategy.run(propulsion, [])
+        
+        message = propulsion.bundle_for_ros(messages.desired_motion())
+        rospy.loginfo(message)
+        pub.publish(message)
+
+        rate.sleep()
+
+
+if __name__ == '__main__':
+    main()
