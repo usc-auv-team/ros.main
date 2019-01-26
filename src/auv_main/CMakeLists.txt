@@ -56,12 +56,17 @@ add_message_files(
   world_heading.msg
 )
 
-## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+## Generate services in the 'srv' folder TODO
+add_service_files(
+  FILES
+  InitMotors.srv
+  SetEnabled.srv
+  Zero.srv
+  SetForwardsPower.srv
+  SetYawAngle.srv
+  SetDepth.srv
+  SetRollPitchAngles.srv
+)
 
 ## Generate actions in the 'action' folder
 # add_action_files(
