@@ -3,6 +3,7 @@
 def main():
     import rospy
     import auv_main.msg as messages
+    import auv_main.srv as services
 
     from main_module.gyro.ros_middleman import Middleman as Gyro
     from main_module.odometer.ros_middleman import Middleman as Odometer
@@ -19,18 +20,39 @@ def main():
     rospy.init_node('main_module', anonymous = False)
     rospy.Subscriber('imu_heading', messages.world_heading, gyro.callback)
     rospy.Subscriber('imu_xyz', messages.world_coordinates, odometer.callback)
-    pub = rospy.Publisher('propulsion', messages.desired_motion, queue_size = 10)
-    # rospy.wait_for_service('turtle_motion')
-    # set_propulsion_to = rospy.ServiceProxy('turtle_motion', messages.desired_motion)
+
+    rospy.wait_for_service('InitMotors')
+    rospy.wait_for_service('SetEnabled')
+    rospy.wait_for_service('Zero')
+    rospy.wait_for_service('SetForwardsPower')
+    rospy.wait_for_service('SetYawAngle')
+    rospy.wait_for_service('SetDepth')
+    rospy.wait_for_service('SetRollPitchAngles')
+
+    # TODO could we use the flag persistent=true in all of these calls
+    # if so, make sure to call close() later on
+    ros_init_motors = rospy.ServiceProxy('InitMotors', services.InitMotors)
+    ros_set_enabled = rospy.ServiceProxy('SetEnabled', services.SetEnabled)
+    ros_zero = rospy.ServiceProxy('Zero', services.Zero)
+    ros_set_forwards_power = rospy.ServiceProxy('SetForwardsPower', services.SetForwardsPower)
+    ros_set_yaw_angle = rospy.ServiceProxy('SetYawAngle', services.SetYawAngle)
+    ros_set_depth = rospy.ServiceProxy('SetDepth', services.SetDepth)
+    ros_set_roll_pitch_angles = rospy.ServiceProxy('SetRollPitchAngles', services.SetRollPitchAngles)
+
+    ros_init_motors()
+    ros_set_enabled(True)
+    ros_zero()
 
     rate = rospy.Rate(10)# Hz
-
     while not rospy.is_shutdown():
         strategy.run(propulsion, [])
-        
+
         message = propulsion.bundle_for_ros(messages.desired_motion())
         rospy.loginfo(message)
-        pub.publish(message)
+
+        ros_set_forwards_power(message.desired_percent_speed)
+        ros_set_yaw_angle(message.desired_degrees_yaw)
+        ros_set_depth(odometer.z + message.desired_delta_depth_meters)
 
         rate.sleep()
 

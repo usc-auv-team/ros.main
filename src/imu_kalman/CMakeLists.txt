@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  geometry_msgs
   message_generation
 )
 
@@ -50,23 +51,15 @@ catkin_python_setup()
 ## Generate messages in the 'msg' folder TODO
 add_message_files(
   FILES
-  desired_motion.msg
-  vision_suite.msg
   world_coordinates.msg
   world_heading.msg
 )
 
 ## Generate services in the 'srv' folder TODO
-add_service_files(
-  FILES
-  InitMotors.srv
-  SetEnabled.srv
-  Zero.srv
-  SetForwardsPower.srv
-  SetYawAngle.srv
-  SetDepth.srv
-  SetRollPitchAngles.srv
-)
+# add_service_files(
+#   FILES
+#   Example.srv
+# )
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -79,6 +72,7 @@ add_service_files(
 generate_messages(
   DEPENDENCIES
   std_msgs
+  geometry_msgs
 )
 
 ################################################
@@ -168,8 +162,7 @@ include_directories(
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination TODO
 install(PROGRAMS
-  scripts/simulation
-  nodes/mainnode
+  nodes/imunode
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
