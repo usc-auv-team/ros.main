@@ -133,9 +133,9 @@ def main():
     # init node
     rospy.init_node('imu_kalman', anonymous = False)
     # subscribe earthAccel
-    rospy.Subscriber("earthAccel", Vector3Stamped, update_pos)
+    rospy.Subscriber("ngimu/earthAccel", Vector3Stamped, update_pos)
     # create publisher
-    pub = rospy.Publisher('imu_xyz', messages.world_coordinates, queue_size = 10)
+    pub = rospy.Publisher('imu_kalman/xyz', Vector3Stamped, queue_size = 10)
     rate = rospy.Rate(10)# Hz
 
     # start service
@@ -146,10 +146,10 @@ def main():
 
     while not rospy.is_shutdown():
 
-        message = messages.world_coordinates();
-        message.x_meters = past_dn
-        message.y_meters = past_de
-        message.z_meters = past_dd
+        message = Vector3Stamped();
+        message.vector.x = past_dn
+        message.vector.y = past_de
+        message.vector.z = past_dd
 
         pub.publish(message)
         rate.sleep()

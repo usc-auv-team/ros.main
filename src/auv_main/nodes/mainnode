@@ -4,6 +4,7 @@ def main():
     import rospy
     import auv_main.msg as messages
     import auv_main.srv as services
+    from geometry_msgs.msg import Vector3Stamped
 
     from main_module.gyro.ros_middleman import Middleman as Gyro
     from main_module.odometer.ros_middleman import Middleman as Odometer
@@ -18,26 +19,26 @@ def main():
     strategy = coach.initialize(strategy, gyro, odometer)
 
     rospy.init_node('main_module', anonymous = False)
-    rospy.Subscriber('imu_heading', messages.world_heading, gyro.callback)
-    rospy.Subscriber('imu_xyz', messages.world_coordinates, odometer.callback)
+    rospy.Subscriber('ngimu/euler', Vector3Stamped, gyro.callback)
+    rospy.Subscriber('imu_kalman/xyz', Vector3Stamped, odometer.callback)
 
-    rospy.wait_for_service('InitMotors')
-    rospy.wait_for_service('SetEnabled')
-    rospy.wait_for_service('Zero')
-    rospy.wait_for_service('SetForwardsPower')
-    rospy.wait_for_service('SetYawAngle')
-    rospy.wait_for_service('SetDepth')
-    rospy.wait_for_service('SetRollPitchAngles')
+    rospy.wait_for_service('motion_controller/InitMotors')
+    rospy.wait_for_service('motion_controller/SetEnabled')
+    rospy.wait_for_service('motion_controller/Zero')
+    rospy.wait_for_service('motion_controller/SetForwardsPower')
+    rospy.wait_for_service('motion_controller/SetYawAngle')
+    rospy.wait_for_service('motion_controller/SetDepth')
+    rospy.wait_for_service('motion_controller/SetRollPitchAngles')
 
     # TODO could we use the flag persistent=true in all of these calls
     # if so, make sure to call close() later on
-    ros_init_motors = rospy.ServiceProxy('InitMotors', services.InitMotors)
-    ros_set_enabled = rospy.ServiceProxy('SetEnabled', services.SetEnabled)
-    ros_zero = rospy.ServiceProxy('Zero', services.Zero)
-    ros_set_forwards_power = rospy.ServiceProxy('SetForwardsPower', services.SetForwardsPower)
-    ros_set_yaw_angle = rospy.ServiceProxy('SetYawAngle', services.SetYawAngle)
-    ros_set_depth = rospy.ServiceProxy('SetDepth', services.SetDepth)
-    ros_set_roll_pitch_angles = rospy.ServiceProxy('SetRollPitchAngles', services.SetRollPitchAngles)
+    ros_init_motors = rospy.ServiceProxy('motion_controller/InitMotors', services.InitMotors)
+    ros_set_enabled = rospy.ServiceProxy('motion_controller/SetEnabled', services.SetEnabled)
+    ros_zero = rospy.ServiceProxy('motion_controller/Zero', services.Zero)
+    ros_set_forwards_power = rospy.ServiceProxy('motion_controller/SetForwardsPower', services.SetForwardsPower)
+    ros_set_yaw_angle = rospy.ServiceProxy('motion_controller/SetYawAngle', services.SetYawAngle)
+    ros_set_depth = rospy.ServiceProxy('motion_controller/SetDepth', services.SetDepth)
+    ros_set_roll_pitch_angles = rospy.ServiceProxy('motion_controller/SetRollPitchAngles', services.SetRollPitchAngles)
 
     ros_init_motors()
     ros_set_enabled(True)
