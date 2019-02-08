@@ -1,0 +1,76 @@
+#!/usr/bin/env python
+
+class Visualizer(object):
+    EXTEND_THRESHOLD = 0.8
+
+    def __init__(self, pixels_per_meter = 200):
+        import cv2
+        self.cv2 = cv2
+        from numpy import zeros
+        self.zeros = zeros
+
+        self._dot_scale = 0.004
+        self.pixels_per_meter = pixels_per_meter
+        self.counter = 0
+        self.position_graph = zeros((800, 800, 3), dtype = 'uint8')
+
+    def position(self, x, y, z, every = 100):
+        if self.counter%every is 0:
+            x, y = self._meters_to_pixels(x, y)
+            self._extend_canvas(x, y)
+
+            blue = 255 + 150*z# color represents depth
+            self.cv2.circle(self.position_graph, (x, y), self.dot_scale, (blue, 255, 0), -1)
+            self.cv2.imshow('position', self.position_graph)
+            self.cv2.waitKey(1)
+
+        self.counter += 1
+
+    def _meters_to_pixels(self, x, y):
+        y_range, x_range = self.position_graph.shape[:2]
+        y_center, x_center = [y_range//2, x_range//2]
+        return (int(x*self.pixels_per_meter + x_center), int(y_center - y*self.pixels_per_meter))
+
+    def _extend_canvas(self, x, y):
+        y_range, x_range = self.position_graph.shape[:2]
+        if x > x_range*Visualizer.EXTEND_THRESHOLD or y > y_range*Visualizer.EXTEND_THRESHOLD:
+            new_graph = self.cv2.resize(self.position_graph, (int(x_range*Visualizer.EXTEND_THRESHOLD), int(y_range*Visualizer.EXTEND_THRESHOLD)))
+            self.position_graph = self.zeros((self.position_graph.shape[0], self.position_graph.shape[1], 3), dtype = 'uint8')
+
+            border = [(big_dim - small_dim)//2 for (big_dim, small_dim) in zip(self.position_graph.shape, new_graph.shape)]
+            self.position_graph[border[0]:border[0] + new_graph.shape[0], border[1]:border[1] + new_graph.shape[1]] = new_graph
+
+            self.pixels_per_meter *= Visualizer.EXTEND_THRESHOLD
+            self._dot_scale *= Visualizer.EXTEND_THRESHOLD
+
+    @property
+    def dot_scale(self):
+        return int(self._dot_scale*self.position_graph.shape[0])
+
+def main():
+    from main_module.gyro.simulation import Simulated as Gyro
+    from main_module.odometer.simulation import Simulated as Odometer
+    from main_module.propulsion.simulation import Simulated as Propulsion
+    from main_module.planning.s2018 import coach
+
+    gyro = Gyro(30.0)
+    odometer = Odometer(30.0)
+    propulsion = Propulsion(gyro, 30.0)
+
+    strategy = coach.list_of_strategies()[0]
+    strategy = coach.initialize(strategy, gyro, odometer)
+
+    visualizer = Visualizer()
+
+    while True:
+        try:
+            strategy.run(propulsion, [])
+            gyro.complete_loop_update(propulsion)
+            odometer.complete_loop_update(gyro, propulsion)
+            # print(odometer.position.xyz)
+            visualizer.position(odometer.position.x, odometer.position.y, odometer.position.z)
+        except KeyboardInterrupt:
+            break
+
+if __name__ == '__main__':
+    main()

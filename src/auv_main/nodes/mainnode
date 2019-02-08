@@ -1,0 +1,62 @@
+#!/usr/bin/env python
+
+def main():
+    import rospy
+    import auv_main.msg as messages
+    import auv_main.srv as services
+    from geometry_msgs.msg import Vector3Stamped
+
+    from main_module.gyro.ros_middleman import Middleman as Gyro
+    from main_module.odometer.ros_middleman import Middleman as Odometer
+    from main_module.propulsion.ros_middleman import Middleman as Propulsion
+    from main_module.planning.s2018 import coach
+
+    gyro = Gyro()
+    odometer = Odometer()
+    propulsion = Propulsion(gyro)
+
+    strategy = coach.list_of_strategies()[2]
+    strategy = coach.initialize(strategy, gyro, odometer)
+
+    rospy.init_node('main_module', anonymous = False)
+    rospy.Subscriber('ngimu/euler', Vector3Stamped, gyro.callback)
+    rospy.Subscriber('imu_kalman/xyz', Vector3Stamped, odometer.callback)
+
+    rospy.wait_for_service('motion_controller/InitMotors')
+    rospy.wait_for_service('motion_controller/SetEnabled')
+    rospy.wait_for_service('motion_controller/Zero')
+    rospy.wait_for_service('motion_controller/SetForwardsPower')
+    rospy.wait_for_service('motion_controller/SetYawAngle')
+    rospy.wait_for_service('motion_controller/SetDepth')
+    rospy.wait_for_service('motion_controller/SetRollPitchAngles')
+
+    # TODO could we use the flag persistent=true in all of these calls
+    # if so, make sure to call close() later on
+    ros_init_motors = rospy.ServiceProxy('motion_controller/InitMotors', services.InitMotors)
+    ros_set_enabled = rospy.ServiceProxy('motion_controller/SetEnabled', services.SetEnabled)
+    ros_zero = rospy.ServiceProxy('motion_controller/Zero', services.Zero)
+    ros_set_forwards_power = rospy.ServiceProxy('motion_controller/SetForwardsPower', services.SetForwardsPower)
+    ros_set_yaw_angle = rospy.ServiceProxy('motion_controller/SetYawAngle', services.SetYawAngle)
+    ros_set_depth = rospy.ServiceProxy('motion_controller/SetDepth', services.SetDepth)
+    ros_set_roll_pitch_angles = rospy.ServiceProxy('motion_controller/SetRollPitchAngles', services.SetRollPitchAngles)
+
+    ros_init_motors()
+    ros_set_enabled(True)
+    ros_zero()
+
+    rate = rospy.Rate(10)# Hz
+    while not rospy.is_shutdown():
+        strategy.run(propulsion, [])
+
+        message = propulsion.bundle_for_ros(messages.desired_motion())
+        rospy.loginfo(message)
+
+        ros_set_forwards_power(message.desired_percent_speed)
+        ros_set_yaw_angle(message.desired_degrees_yaw)
+        ros_set_depth(odometer.z + message.desired_delta_depth_meters)
+
+        rate.sleep()
+
+
+if __name__ == '__main__':
+    main()
