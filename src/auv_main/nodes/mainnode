@@ -15,7 +15,8 @@ def main():
     odometer = Odometer()
     propulsion = Propulsion(gyro)
 
-    strategy = coach.list_of_strategies()[2]
+
+    strategy = coach.list_of_strategies()[0]
     strategy = coach.initialize(strategy, gyro, odometer)
 
     rospy.init_node('main_module', anonymous = False)
@@ -51,7 +52,7 @@ def main():
         message = propulsion.bundle_for_ros(messages.desired_motion())
         rospy.loginfo(message)
 
-        ros_set_forwards_power(message.desired_percent_speed)
+        ros_set_forwards_power(100*message.desired_percent_speed)
         ros_set_yaw_angle(message.desired_degrees_yaw)
         ros_set_depth(odometer.z + message.desired_delta_depth_meters)
 
