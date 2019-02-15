@@ -1,10 +1,116 @@
 #!/usr/bin/env python
 
+from geometry_msgs.msg import Vector3Stamped
+import imu_kalman.msg as messages
+import rospy
+
+first_update = True
+
+init_an = 0.0
+init_ae = 0.0
+init_ad = 0.0
+init_vn = 0.0
+init_ve = 0.0
+init_vd = 0.0
+init_dn = 0.0
+init_de = 0.0
+init_dd = 0.0
+
+init_time_stamp = rospy.Time(0)
+
+# Return vector3 of current position
+def get_curr_pos():
+    message = Vector3Stamped()
+    message.vector.x = init_dn
+    message.vector.y = init_de
+    message.vector.z = init_dd
+    return message
+
+# Update position data
+def update_pos(data):
+    global init_time_stamp
+    global first_update
+
+    # only unpack on first_update
+    if first_update:
+        init_time_stamp = data.header.stamp
+        first_update = False
+        return
+
+    global init_an
+    global init_ae
+    global init_ad
+    global init_vn
+    global init_ve
+    global init_vd
+    global init_dn
+    global init_de
+    global init_dd
+
+    # Unpack data
+    an = data.vector.x
+    ae = data.vector.y
+    ad = data.vector.z
+    delta_t = (data.header.stamp - init_time_stamp).to_sec()
+
+    # Super basic filter to remove IMU output that is in high magnitude
+    if abs(an) > 1.0 * 10 ** 3:
+        an = init_an
+    if abs(ae) > 1.0 * 10 ** 3:
+        ae = init_ae
+    if abs(ad) > 1.0 * 10 ** 3:
+        ad = init_ad
+
+    # Calculate distance using acceleration
+    vn = init_vn + an * delta_t
+    ve = init_ve + ae * delta_t
+    vd = init_vd + ad * delta_t
+    dn = init_dn + vn * delta_t + 0.5 * an * delta_t ** 2
+    de = init_de + ve * delta_t + 0.5 * ae * delta_t ** 2
+    dd = init_dd + vd * delta_t + 0.5 * ad * delta_t ** 2
+
+    # Update initial variables for next calculation
+    init_an = an
+    init_ae = ae
+    init_ad = ad
+    init_vn = vn
+    init_ve = ve
+    init_vd = vd
+    init_dn = dn
+    init_de = de
+    init_dd = dd
+    init_time_stamp = data.header.stamp
+
+def main():
+    # Init node
+    rospy.init_node('imu_kalman', anonymous=False)
+    # Subscribe to earthAccel
+    rospy.Subscriber("ngimu/earthAccel", Vector3Stamped, update_pos)
+    # Create publisher
+    pub = rospy.Publisher('imu_kalman/xyz', Vector3Stamped, queue_size=10)
+    rate = rospy.Rate(10)  # Hz
+
+    # start service
+    # s = rospy.Service('get_position', GetPosition, get_position)
+    # print "IMU service ready."
+    #
+    # rospy.spin()
+
+    while not rospy.is_shutdown():
+        message = get_curr_pos()
+        pub.publish(message)
+        rate.sleep()
+
+
+if __name__ == "__main__":
+    main()
+
 """
 AUTHORS
 Physics by Yash Chandak
 ROS Interface by Matthew Fala
-
+"""
+'''
 INFO
 This is the IMU Service for collecting accelleration information and
 providing location coordinates in meters
@@ -27,90 +133,7 @@ IMU Service USAGE
        print "Service call failed: %s"%e
 
 CONVENTION: D is the z axis and is used as a standard up, not down!!!
-"""
 
-# from auv_main.srv import *
-from geometry_msgs.msg import Vector3Stamped
-import imu_kalman.msg as messages
-import rospy
-
-first_update = True
-
-past_an = 0.0
-past_ae = 0.0
-past_ad = 0.0
-past_vn = 0.0
-past_ve = 0.0
-past_vd = 0.0
-past_dn = 0.0
-past_de = 0.0
-past_dd = 0.0
-
-past_time_stamp = rospy.Time(0)
-
-def update_pos(data):
-
-    global past_time_stamp
-    global first_update
-
-    # only unpack on first_update
-    if first_update:
-
-        past_time_stamp = data.header.stamp
-        first_update = False
-        return
-
-    # is this really nessesary?
-    global past_an
-    global past_ae
-    global past_ad
-    global past_vn
-    global past_ve
-    global past_vd
-    global past_dn
-    global past_de
-    global past_dd
-
-    # unpack data
-    an = data.vector.x
-    ae = data.vector.y
-    ad = data.vector.z
-    delta_t = (data.header.stamp - past_time_stamp).to_sec()
-
-    # Super basic filter to remove IMU output that is in high magnitude (more in Notes below)
-    if (abs(an) > 1.0*10**3):
-        an = past_an
-    if (abs(ae) > 1.0*10**3):
-        ae = past_ae
-    if (abs(ad) > 1.0*10**3):
-        ad = past_ad
-
-    # Another way to calculate distance using acceleration
-    # Both methods should theoretically come to the same value, but Danny claimed my formula was off so I implemented his
-    vn = past_vn + an*delta_t
-    ve = past_ve + ae*delta_t
-    vd = past_vd + ad*delta_t
-    dn = past_dn + vn*delta_t + 0.5*an*delta_t**2
-    de = past_de + ve*delta_t + 0.5*ae*delta_t**2
-    dd = past_dd + vd*delta_t + 0.5*ad*delta_t**2
-
-    # Put current values in the initial variables
-    past_an = an
-    past_ae = ae
-    past_ad = ad
-    past_vn = vn
-    past_ve = ve
-    past_vd = vd
-    past_dn = dn
-    past_de = de
-    past_dd = dd
-    past_time_stamp =  data.header.stamp
-
-# def get_position(empty):
-#     return GetPositionResponse(past_dn, past_de, past_dd)
-
-
-"""
 Notes:
 There is a calibration error that is causing there to be a slight acceleration even when the IMU is sitting still.
 We need to find a way to calibrate the IMU before testing.
@@ -126,33 +149,4 @@ Need to implement the Kalman Filter.
 Need to collect data of the IMU moving in a circle.
 
 Need to figure out the units of the data given.
-"""
-
-def main():
-
-    # init node
-    rospy.init_node('imu_kalman', anonymous = False)
-    # subscribe earthAccel
-    rospy.Subscriber("ngimu/earthAccel", Vector3Stamped, update_pos)
-    # create publisher
-    pub = rospy.Publisher('imu_kalman/xyz', Vector3Stamped, queue_size = 10)
-    rate = rospy.Rate(10)# Hz
-
-    # start service
-    # s = rospy.Service('get_position', GetPosition, get_position)
-    # print "IMU service ready."
-    #
-    # rospy.spin()
-
-    while not rospy.is_shutdown():
-
-        message = Vector3Stamped();
-        message.vector.x = past_dn
-        message.vector.y = past_de
-        message.vector.z = past_dd
-
-        pub.publish(message)
-        rate.sleep()
-
-if __name__ == "__main__":
-    main()
+'''
