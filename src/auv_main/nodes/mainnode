@@ -57,6 +57,14 @@ def main():
 
         rate.sleep()
 
+    ros_init_motors.close()
+    ros_set_enabled.close()
+    ros_zero.close()
+    ros_set_forwards_power.close()
+    ros_set_yaw_angle.close()
+    ros_set_depth.close()
+    ros_set_roll_pitch_angles.close()
+
 
 if __name__ == '__main__':
     main()
