@@ -9,7 +9,7 @@ TODO:
     Implement a custom ROS Message to send the information
     Add probability, object id, and frame number
 
-A different file called cv_inference_dist will obtain the distance to the object 
+A different file called cv_inference_dist will obtain the distance to the object
 """
 
 from __future__ import print_function
@@ -207,8 +207,8 @@ def inference_and_talker():
                         object_dict[xmin,ymin,xmax,ymax,(category_index.get(value)).get('name').encode('utf8')] = \
                             scores[0, index]
                         objects.append(object_dict)
-                        # sent_str = "{" + "\"xmin\":" + str(xmin) + ", \"xmax\":" + str(xmax) + "}"
-                        # pub.publish(str(objects[0]))
+                        sent_str = "{" + "\"xmin\":" + str(xmin) + ", \"xmax\":" + str(xmax) + ", \"ymin\":" + str(ymin) + ", \"ymax\":" + str(ymax) + "}"
+                        pub.publish(sent_str);
 
 
                     # out.write(cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR))

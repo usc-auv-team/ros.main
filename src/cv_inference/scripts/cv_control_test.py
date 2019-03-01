@@ -41,10 +41,15 @@ def callback(data):
    try:
         global current_angle, current_distance, frame_w_center, frame_h_center, default_power
         json_data = json.loads(data.data)
-        xmax = json_data['xmax']
-        print("got xmax from json: " + str(xmax))
         xmin = json_data['xmin']
         print("got xmin from json: " + str(xmin))
+        xmax = json_data['xmax']
+        print("got xmax from json: " + str(xmax))
+        ymin = json_data['ymin']
+        print("got ymin from json: " + str(ymin))
+        ymax = json_data['ymax']
+        print("got ymax from json: " + str(ymax))
+
         object_center = (xmax+xmin)/2
         if(object_center > frame_w_center):
             current_angle+=1

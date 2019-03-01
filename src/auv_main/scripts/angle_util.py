@@ -1,7 +1,7 @@
 """Angle Calculation Function
     constants:
         horizontal FOV: 80 degrees
-        vertical FOV: 63 degrees
+        vertical FOV: 64 degrees
     formula:
         ((x - (totalWidth/2))/totalWidth ) * FOV
 """
