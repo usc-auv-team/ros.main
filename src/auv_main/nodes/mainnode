@@ -15,9 +15,11 @@ def main():
     odometer = Odometer()
     propulsion = Propulsion(gyro)
 
+    import rospkg
+    path = rospkg.RosPack().get_path('auv_main')
     import json
-    conf = open('config.json').read()
-    conf = json.loads(config_file)
+    conf = open(path + '/nodes/config.json').read()
+    conf = json.loads(conf)
     gyro.configure_message_outlets(conf['gyro']['x'], conf['gyro']['y'], conf['gyro']['z'])
     odometer.configure_message_outlets(conf['odometer']['x'], conf['odometer']['y'], conf['odometer']['z'])
     Propulsion.configure_class_params(conf['translationalPID'], conf['rotationalPID'], conf['maxYawErrorWhileMoving'])
