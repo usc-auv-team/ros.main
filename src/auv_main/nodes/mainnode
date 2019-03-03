@@ -15,6 +15,13 @@ def main():
     odometer = Odometer()
     propulsion = Propulsion(gyro)
 
+    import json
+    conf = open('config.json').read()
+    conf = json.loads(config_file)
+    gyro.configure_message_outlets(conf['gyro']['x'], conf['gyro']['y'], conf['gyro']['z'])
+    odometer.configure_message_outlets(conf['odometer']['x'], conf['odometer']['y'], conf['odometer']['z'])
+    Propulsion.configure_class_params(conf['translationalPID'], conf['rotationalPID'], conf['maxYawErrorWhileMoving'])
+
     strategy = coach.list_of_strategies()[2]
     strategy = coach.initialize(strategy, gyro, odometer)
 
@@ -57,13 +64,13 @@ def main():
 
         rate.sleep()
 
-    ros_init_motors.close()
-    ros_set_enabled.close()
-    ros_zero.close()
-    ros_set_forwards_power.close()
-    ros_set_yaw_angle.close()
-    ros_set_depth.close()
-    ros_set_roll_pitch_angles.close()
+    # ros_init_motors.close()
+    # ros_set_enabled.close()
+    # ros_zero.close()
+    # ros_set_forwards_power.close()
+    # ros_set_yaw_angle.close()
+    # ros_set_depth.close()
+    # ros_set_roll_pitch_angles.close()
 
 
 if __name__ == '__main__':

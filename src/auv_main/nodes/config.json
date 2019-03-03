@@ -1,0 +1,15 @@
+{
+  "gyro": {
+    "x": "pitch",
+    "y": "roll",
+    "z": "yaw"
+  },
+  "odometer": {
+    "x": "-east",
+    "y": "north",
+    "z": "down"
+  },
+  "translationalPID": [0.05, 0.0, 0.0],
+  "rotationalPID": [0.05, 0.0, 0.0],
+  "maxYawErrorWhileMoving": 5.0
+}
