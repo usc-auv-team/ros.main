@@ -33,6 +33,9 @@ CONVENTION: D is the z axis and is used as a standard up, not down!!!
 from geometry_msgs.msg import Vector3Stamped
 import imu_kalman.msg as messages
 import rospy
+import sys
+sys.path.append('../scripts/')
+import callibrate_imu
 
 first_update = True
 
@@ -45,6 +48,7 @@ past_vd = 0.0
 past_dn = 0.0
 past_de = 0.0
 past_dd = 0.0
+acceleration_bias = Vector3Stamped()
 
 past_time_stamp = rospy.Time(0)
 
@@ -72,9 +76,9 @@ def update_pos(data):
     global past_dd
 
     # unpack data
-    an = data.vector.x
-    ae = data.vector.y
-    ad = data.vector.z
+    an = data.vector.x - acceleration_bias.vector.x
+    ae = data.vector.y - acceleration_bias.vector.y
+    ad = data.vector.z - acceleration_bias.vector.z
     delta_t = (data.header.stamp - past_time_stamp).to_sec()
 
     # Super basic filter to remove IMU output that is in high magnitude (more in Notes below)
@@ -132,6 +136,8 @@ def main():
 
     # init node
     rospy.init_node('imu_kalman', anonymous = False)
+    global acceleration_bias
+    acceleration_bias = callibrate_imu.calibrate()
     # subscribe earthAccel
     rospy.Subscriber("ngimu/earthAccel", Vector3Stamped, update_pos)
     # create publisher
