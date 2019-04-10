@@ -36,7 +36,7 @@ current_angle = 0
 default_power = 0.5
 frame_width = 640
 frame_height = 480
-current_box_center = ObjectCenter()
+current_box_location = ObjectCenter()
 angle_threshhold = 2 # Threshhold for angle between AUV and box
 
 def set_disabled():
@@ -81,13 +81,13 @@ def callback(data):
         global current_angle, default_power, current_box_location, frame_height, frame_width, angle_threshhold
         json_data = json.loads(data.data)
         x_min = json_data['xmin']
-        print("got xmin from json: " + str(xmin))
+        print("got xmin from json: " + str(x_min))
         x_max = json_data['xmax']
-        print("got xmax from json: " + str(xmax))
+        print("got xmax from json: " + str(x_max))
         y_min = json_data['ymin']
-        print("got ymin from json: " + str(ymin))
+        print("got ymin from json: " + str(y_min))
         y_max = json_data['ymax']
-        print("got ymax from json: " + str(ymax))
+        print("got ymax from json: " + str(y_max))
         
         # Set object center
         current_box_location.set_center(x_min, x_max, y_min, y_max)
@@ -96,7 +96,7 @@ def callback(data):
         angle = current_box_location.get_angle(frame_width, frame_height)
         print("Current angle difference is ", angle)
         # If aligned properly move so that the box is under the AUV
-        if math.abs(angle) <= angle_threshhold:
+        if abs(angle) <= angle_threshhold:
             # Move accordingly
             print("Angle within threshold so I want to move forwards or backwards")
 
@@ -118,7 +118,7 @@ def cv_dropper_test():
         rospy.Subscriber("cv_detection", String, callback) # Subscribe to cv_detection and perform callback function
         rospy.spin() # Loop to keep going
     except rospy.ServiceException, e:
-        print "Service call failed: %s"%e
+        print("Service call failed: %s"%e)
         print("Exiting")
 
 def local_test():
@@ -130,7 +130,8 @@ def local_test():
 
 if __name__ == '__main__':
     try:
-        cv_dropper_test()
+        local_test()
+        # cv_dropper_test()
     except (KeyboardInterrupt, SystemExit):
         print("Exiting")
         set_disabled()
