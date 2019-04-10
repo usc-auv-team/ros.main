@@ -28,8 +28,10 @@ class ObjectCenter:
         # Base point is (img_width/2, img_height) and vectors are calculated with that 
         base_vector = (0, 0 - img_height) # 0 for first because the calculation will always evaluate to that
         object_vector = (self.x - (img_width / 2), self.y - img_height)
-        return math.degrees(math.acos(self.get_dot_product(base_vector, object_vector) /
+        angle = math.degrees(math.acos(self.get_dot_product(base_vector, object_vector) /
             (self.get_magnitude(base_vector) * self.get_magnitude(object_vector))))
+        return 0 - angle if self.x > (img_width/2) else angle
+
 
 
 current_angle = 0
@@ -122,14 +124,14 @@ def cv_dropper_test():
         print("Exiting")
 
 def local_test():
-    print("Started!")
-    obj = ObjectCenter(300,50)
+    obj = ObjectCenter(240,50)
     angle = obj.get_angle(640,480)
     print(angle)
 
 
 if __name__ == '__main__':
     try:
+        print("Started!")
         local_test()
         # cv_dropper_test()
     except (KeyboardInterrupt, SystemExit):
