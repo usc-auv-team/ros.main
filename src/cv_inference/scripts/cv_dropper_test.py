@@ -118,7 +118,7 @@ def cv_dropper_test():
         rospy.Subscriber("cv_detection", String, callback) # Subscribe to cv_detection and perform callback function
         rospy.spin() # Loop to keep going
     except rospy.ServiceException, e:
-        print "Service call failed: %s"%e
+        print("Service call failed: %s"%e)
         print("Exiting")
 
 def local_test():
