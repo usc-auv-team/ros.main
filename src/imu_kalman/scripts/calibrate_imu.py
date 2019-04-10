@@ -6,20 +6,25 @@ acceleration_bias = Vector3Stamped()
 accel_zero_count = 0
 
 def addAccelSample(acceleration):
+	global count
+	global acceleration_bias
 	acceleration_bias.vector.x += acceleration.vector.x
 	acceleration_bias.vector.y += acceleration.vector.y
 	acceleration_bias.vector.z += acceleration.vector.z
 	count += 1
 
 def calibrate():
-	acceleration_bias.vector.x = 0
-	acceleration_bias.vector.y = 0
-	acceleration_bias.vector.z = 0
+	global count
+	global acceleration_bias
+	acceleration_bias.vector.x = 0.0
+	acceleration_bias.vector.y = 0.0
+	acceleration_bias.vector.z = 0.0
 	subscription = rospy.Subscriber('ngimu/earthAccel', Vector3Stamped, addAccelSample)
 	
 	while True:
 		if count >= 1024:
 			subscription.unregister()
+			break
 			
 	acceleration_bias.vector.x /= count
 	acceleration_bias.vector.y /= count
