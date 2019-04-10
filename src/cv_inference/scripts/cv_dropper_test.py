@@ -37,7 +37,7 @@ default_power = 0.5
 frame_width = 640
 frame_height = 480
 current_box_location = ObjectCenter()
-angle_threshhold = 2 # Threshhold for angle between AUV and box
+angle_threshhold = 8 # Threshhold for angle between AUV and box
 
 def set_disabled():
     print("Waiting for SetEnabled")
