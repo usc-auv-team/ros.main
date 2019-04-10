@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from motion_controller.srv import *
+# from motion_controller.srv import *
 from std_msgs.msg import String
 import rospy
 import math
@@ -28,16 +28,18 @@ class ObjectCenter:
         # Base point is (img_width/2, img_height) and vectors are calculated with that 
         base_vector = (0, 0 - img_height) # 0 for first because the calculation will always evaluate to that
         object_vector = (self.x - (img_width / 2), self.y - img_height)
-        return math.degrees(math.acos(self.get_dot_product(base_vector, object_vector) /
+        angle = math.degrees(math.acos(self.get_dot_product(base_vector, object_vector) /
             (self.get_magnitude(base_vector) * self.get_magnitude(object_vector))))
+        return 0 - angle if self.x > (img_width/2) else angle
+
 
 
 current_angle = 0
 default_power = 0.5
 frame_width = 640
 frame_height = 480
-current_box_center = ObjectCenter()
-angle_threshhold = 2 # Threshhold for angle between AUV and box
+current_box_location = ObjectCenter()
+angle_threshhold = 8 # Threshhold for angle between AUV and box
 
 def set_disabled():
     print("Waiting for SetEnabled")
@@ -81,13 +83,13 @@ def callback(data):
         global current_angle, default_power, current_box_location, frame_height, frame_width, angle_threshhold
         json_data = json.loads(data.data)
         x_min = json_data['xmin']
-        print("got xmin from json: " + str(xmin))
+        print("got xmin from json: " + str(x_min))
         x_max = json_data['xmax']
-        print("got xmax from json: " + str(xmax))
+        print("got xmax from json: " + str(x_max))
         y_min = json_data['ymin']
-        print("got ymin from json: " + str(ymin))
+        print("got ymin from json: " + str(y_min))
         y_max = json_data['ymax']
-        print("got ymax from json: " + str(ymax))
+        print("got ymax from json: " + str(y_max))
         
         # Set object center
         current_box_location.set_center(x_min, x_max, y_min, y_max)
@@ -96,14 +98,14 @@ def callback(data):
         angle = current_box_location.get_angle(frame_width, frame_height)
         print("Current angle difference is ", angle)
         # If aligned properly move so that the box is under the AUV
-        if math.abs(angle) <= angle_threshhold:
+        if abs(angle) <= angle_threshhold:
             # Move accordingly
             print("Angle within threshold so I want to move forwards or backwards")
 
         # Align self with it if needed
         else:
             print("Correcting my angle")
-            if angle > 0: # Turn right
+            if angle < 0: # Turn right
                 print("I want to turn right")
             else: # Turn left
                 print("I want to turn left")
@@ -122,14 +124,15 @@ def cv_dropper_test():
         print("Exiting")
 
 def local_test():
-    print("Started!")
-    obj = ObjectCenter(300,50)
+    obj = ObjectCenter(240,50)
     angle = obj.get_angle(640,480)
     print(angle)
 
 
 if __name__ == '__main__':
     try:
+        print("Started!")
+        # local_test()
         cv_dropper_test()
     except (KeyboardInterrupt, SystemExit):
         print("Exiting")

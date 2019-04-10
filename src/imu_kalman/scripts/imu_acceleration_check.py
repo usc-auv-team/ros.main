@@ -1,12 +1,24 @@
 from geometry_msgs.msg import Vector3Stamped
 import rospy
 
+pub = rospy.Publisher('ngimu/zeroVelocity', Vector3Stamped, queue_size=10)
+accel_count = Vector3Stamped()
+accel_count.vector.x = accel_count.vector.y = accel_count.vector.z = 0
 
-def checkAccelZero():
-	pub = rospy.Publisher('ngimu/zeroVelocity', Vector3Stamped, queue_size=10)
-	accel_count =  Vector3Stamped()
-	accel_count.vector.x = accel_count.vector.y = accel_count.vector.z = 0
-	threshold = 25
+def main():
+	rospy.Subscriber('imu_kalman/accel', Vector3Stamped, checkAccelZero)
+
+        while True:
+            pass
+
+	
+def checkAccelZero(data):
+        global pubb
+        global accel_count
+	threshold = 0.1
+        acceleration.vector.x = data.vector.x
+        acceleration.vector.y = data.vector.y
+        acceleration.vector.z = data.vector.z
 
 	while True:
 		if acceleration.vector.x == 0:
@@ -76,4 +88,4 @@ def checkAccelZero():
 
 
 if __name__ == '__main__':
-	checkAccelZero()
+	main()
