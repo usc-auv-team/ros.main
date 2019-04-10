@@ -5,6 +5,7 @@ count = 0
 acceleration_bias = Vector3Stamped()
 accel_zero_count = 0
 
+
 def addAccelSample(acceleration):
 	global count
 	global acceleration_bias
@@ -12,6 +13,7 @@ def addAccelSample(acceleration):
 	acceleration_bias.vector.y += acceleration.vector.y
 	acceleration_bias.vector.z += acceleration.vector.z
 	count += 1
+
 
 def calibrate():
 	global count
@@ -32,14 +34,10 @@ def calibrate():
 
 	return acceleration_bias
 
-def checkAccelZero(acceleration):
-	if acceleration.vector.x == 0 and acceleration.vector.y == 0 and acceleration.vector.z == 0:
-		accel_zero_count += 1
-	else:
-		accel_zero_count = 0
 
+# Dont use this
 def movement_end_check(acceleration_bias):
-	pub = rospy.Publisher('ngimu/zeroVelocity', bool, queue_size=10)
+	pub = rospy.Publisher('ngimu/zeroVelocity', Vector3Stamped, queue_size=10)
 	rospy.Subscriber('ngimu/earthAccel', Vector3Stamped, checkAccelZero)
 	rate = rospy.Rate(10)
 

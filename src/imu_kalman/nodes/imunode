@@ -4,6 +4,7 @@
 AUTHORS
 Physics by Yash Chandak
 ROS Interface by Matthew Fala
+A lot of other things by Austin Lamb
 
 INFO
 This is the IMU Service for collecting accelleration information and
@@ -36,6 +37,8 @@ import rospy
 import sys
 sys.path.append('/home/nvidia/ros.main/src/imu_kalman/scripts/')
 import calibrate_imu
+import subprocess
+import sys
 
 first_update = True
 
@@ -117,6 +120,18 @@ def update_pos(data):
 # def get_position(empty):
 #     return GetPositionResponse(past_dn, past_de, past_dd)
 
+def zeroVelocity(message):
+	global past_vn
+    global past_ve
+    global past_vd
+
+	if message.vector.x:
+		past_vn = 0.0
+	if message.vector.y:
+		past_ve = 0.0
+	if message.vector.z:
+		past_vd = 0.0
+
 
 """
 Notes:
@@ -144,6 +159,8 @@ def main():
     acceleration_bias = calibrate_imu.calibrate()
     # subscribe earthAccel
     rospy.Subscriber("ngimu/earthAccel", Vector3Stamped, update_pos)
+    # Subscribe to /ngimu/zeroVelocity
+    rospy.Subscriber("ngimu/zeroVelocity", Vector3Stamped, zeroVelocity)
     # create publisher
     pub = rospy.Publisher('imu_kalman/xyz', Vector3Stamped, queue_size = 10)
     rate = rospy.Rate(10)# Hz
@@ -166,3 +183,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+    subprocess.Popen([sys.executable, "/home/nvidia/ros.main/src/imu_kalman/scripts/imu_acceleration_check.py"])
+
