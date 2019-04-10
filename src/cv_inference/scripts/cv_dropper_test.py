@@ -94,34 +94,25 @@ def callback(data):
 
         # Get angle of box center with respect to the y-axis
         angle = current_box_location.get_angle(frame_width, frame_height)
-
-        # If aligned properly, figure out if behind or in front
+        print("Current angle difference is ", angle)
+        # If aligned properly move so that the box is under the AUV
         if math.abs(angle) <= angle_threshhold:
             # Move accordingly
-            pass
+            print("Angle within threshold so I want to move forwards or backwards")
 
         # Align self with it if needed
         else:
+            print("Correcting my angle")
             if angle > 0: # Turn right
-                pass
+                print("I want to turn right")
             else: # Turn left
-                pass
-            pass
+                print("I want to turn left")
 
-        # Repeat
-
-        # object_center = (xmax+xmin)/2
-        # if(object_center > frame_w_center):
-        #     current_angle+=1
-        #     print("moving right")
-        # if(object_center < frame_w_center):
-        #      current_angle-=1
-        #      print("moving left")
-        # cv_Motors_Client(current_angle, default_power)
+        # Now Repeat
    except KeyboardInterrupt:
         set_disabled()
 
-def cv_controls_test():
+def cv_dropper_test():
     try:
         rospy.init_node('cv_dropper_test',anonymous = True) # Init node
         rospy.Subscriber("cv_detection", String, callback) # Subscribe to cv_detection and perform callback function
@@ -130,7 +121,7 @@ def cv_controls_test():
         print "Service call failed: %s"%e
         print("Exiting")
 
-def main():
+def local_test():
     print("Started!")
     obj = ObjectCenter(300,50)
     angle = obj.get_angle(640,480)
@@ -138,4 +129,8 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        cv_dropper_test()
+    except (KeyboardInterrupt, SystemExit):
+        print("Exiting")
+        set_disabled()
