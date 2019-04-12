@@ -77,12 +77,23 @@ def cv_motors_client(angle, power):
     except rospy.ServiceException, e:
         print "Service call failed: %s"%e
 
+
+def step(direction):
+    if direction == "forward":
+        pass
+    elif direction == "backward":
+        pass
+    elif direction == "left":
+        pass
+    elif direction == "right":
+        pass
+
 def drop_marker():
     print("Waiting for marker_dropper service")
     rospy.wait_for_service("marker_dropper/drop_marker")
     print("Attempting to drop marker!")
     try:
-        set_enabled = rospy.ServiceProxy('marker_dropper/drop_marker')
+        set_enabled = rospy.ServiceProxy('marker_dropper/drop_marker', DropMarker)
         set_enabled()
     except rospy.ServiceException, e:
         print("Service call failed: %s"%e)
@@ -90,8 +101,8 @@ def drop_marker():
 def callback(data):
    rospy.loginfo(rospy.get_caller_id() + "I heard %s", data.data)
    try:
-        global current_angle, default_power, current_box_location, frame_height,
-         frame_width, angle_threshhold, distance_threshhold
+        global current_angle, default_power, current_box_location, frame_height, \
+            frame_width, angle_threshhold, distance_threshhold
         json_data = json.loads(data.data)
         x_min = json_data['xmin']
         print("got xmin from json: " + str(x_min))
@@ -115,25 +126,30 @@ def callback(data):
             print("Angle within threshold so I want to move forwards or backwards")
 
             # Get distance between AUV and box
-            distance = (img_height/2) - current_box_location.y
+            distance = (frame_height/2) - current_box_location.y
             print("Distance from target is ", distance)
             if abs(distance) <= distance_threshhold:
                 print("AUV is in position!")
-                drop_marker()
+                # drop_marker()
 
             elif distance > 0: # Move forward
                 print("I want to move forward!")
+                step("forward")
 
-            elif horizontal_distance < 0: # move backwards
+            elif distance < 0: # move backwards
                 print("I want to move backward!")
+                step("backward")
 
         # Align self with it if needed
         else:
             print("Correcting my angle")
             if angle < 0: # Turn right
                 print("I want to turn right")
+                step("right")
+
             else: # Turn left
                 print("I want to turn left")
+                step("left")
 
         # Now Repeat
    except KeyboardInterrupt:
