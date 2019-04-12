@@ -33,13 +33,13 @@ class ObjectCenter:
         return 0 - angle if self.x > (img_width/2) else angle
 
 
-
 current_angle = 0
 default_power = 0.5
 frame_width = 640
 frame_height = 480
 current_box_location = ObjectCenter()
 angle_threshhold = 8 # Threshhold for angle between AUV and box
+distance_threshhold = 10 # Threshhold for distance between the AUV and box 
 
 def set_disabled():
     print("Waiting for SetEnabled")
@@ -77,10 +77,21 @@ def cv_motors_client(angle, power):
     except rospy.ServiceException, e:
         print "Service call failed: %s"%e
 
+def drop_marker():
+    print("Waiting for marker_dropper service")
+    rospy.wait_for_service("marker_dropper/drop_marker")
+    print("Attempting to drop marker!")
+    try:
+        set_enabled = rospy.ServiceProxy('marker_dropper/drop_marker')
+        set_enabled()
+    except rospy.ServiceException, e:
+        print("Service call failed: %s"%e)
+
 def callback(data):
    rospy.loginfo(rospy.get_caller_id() + "I heard %s", data.data)
    try:
-        global current_angle, default_power, current_box_location, frame_height, frame_width, angle_threshhold
+        global current_angle, default_power, current_box_location, frame_height,
+         frame_width, angle_threshhold, distance_threshhold
         json_data = json.loads(data.data)
         x_min = json_data['xmin']
         print("got xmin from json: " + str(x_min))
@@ -97,10 +108,24 @@ def callback(data):
         # Get angle of box center with respect to the y-axis
         angle = current_box_location.get_angle(frame_width, frame_height)
         print("Current angle difference is ", angle)
+
         # If aligned properly move so that the box is under the AUV
         if abs(angle) <= angle_threshhold:
             # Move accordingly
             print("Angle within threshold so I want to move forwards or backwards")
+
+            # Get distance between AUV and box
+            distance = (img_height/2) - current_box_location.y
+            print("Distance from target is ", distance)
+            if abs(distance) <= distance_threshhold:
+                print("AUV is in position!")
+                drop_marker()
+
+            elif distance > 0: # Move forward
+                print("I want to move forward!")
+
+            elif horizontal_distance < 0: # move backwards
+                print("I want to move backward!")
 
         # Align self with it if needed
         else:
