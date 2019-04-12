@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from motion_controller.srv import *
+# from motion_controller.srv import *
 from std_msgs.msg import String
 import rospy
 import math
@@ -130,7 +130,7 @@ def callback(data):
         # Align self with it if needed
         else:
             print("Correcting my angle")
-            if angle > 0: # Turn right
+            if angle < 0: # Turn right
                 print("I want to turn right")
             else: # Turn left
                 print("I want to turn left")
@@ -157,8 +157,8 @@ def local_test():
 if __name__ == '__main__':
     try:
         print("Started!")
-        local_test()
-        # cv_dropper_test()
+        # local_test()
+        cv_dropper_test()
     except (KeyboardInterrupt, SystemExit):
         print("Exiting")
         set_disabled()

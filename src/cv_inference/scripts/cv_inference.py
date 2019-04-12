@@ -34,8 +34,8 @@ from std_msgs.msg import String
 
 # This is needed since the notebook is stored in the object_detection folder.
 # In the future, turn this into flags
-sys.path.append("/home/nvidia/repos/usc-computer-vision-2018/tensorflow/models/research")
-sys.path.append("/home/nvidia/repos/usc-computer-vision-2018/tensorflow/models/research/object_detection")
+sys.path.append("/home/nvidia/cv.tensorflow/cv_detection/models")
+sys.path.append("/home/nvidia/cv.tensorflow/cv_detection/models/object_detection")
 
 # ## Object detection imports
 # Here are the imports from the object detection module.
@@ -49,14 +49,14 @@ from object_detection.utils import visualization_utils as vis_util
 
 # What model to download.
 # MODEL_NAME = 'ssd_mobilenet_v1_coco_2017_11_17'
-MODEL_NAME = '/home/nvidia/repos/usc-computer-vision-2018/cv_detection/models/mobilenet/4_24_17/'
+MODEL_NAME = '/home/nvidia/cv.tensorflow/cv_detection/models/SSD_Mobilenet_4_28'
 # MODEL_NAME = '/home/pedro/pretrained_models/faster_rcnn_resnet101_coco_2018_01_28'
 
 # Path to frozen detection graph. This is the actual model that is used for the object detection.
 PATH_TO_CKPT = MODEL_NAME + '/frozen_inference_graph.pb'
 
 # List of the strings that is used to add correct label for each box.
-PATH_TO_LABELS = '/home/nvidia/repos/usc-computer-vision-2018/tensorflow/models/research/robosub_label_map.pbtxt'
+PATH_TO_LABELS = '/home/nvidia/cv.tensorflow/cv_detection/models/robosub_label_map.pbtxt'
 
 NUM_CLASSES = 13
 
@@ -127,7 +127,7 @@ def inference_and_talker():
             num_detections = detection_graph.get_tensor_by_name('num_detections:0')
 
             # vc = cv2.VideoCapture('/home/pedro/Videos/auv/GOPR0883_small.MP4')
-            vc = cv2.VideoCapture(2)
+            vc = cv2.VideoCapture(0)
             # fourcc = cv2.VideoWriter_fourcc(*'MP4V')
             # out = cv2.VideoWriter('/home/jaimin/Workspace/Wet Tests/output.MP4', fourcc, vc.get(cv2.CAP_PROP_FPS),
             #                       (int(vc.get(cv2.CAP_PROP_FRAME_WIDTH)), int(vc.get(cv2.CAP_PROP_FRAME_HEIGHT))))

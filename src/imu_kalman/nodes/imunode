@@ -42,6 +42,8 @@ import sys
 
 first_update = True
 
+accel_pub = rospy.Publisher('imu_kalman/accel', Vector3Stamped, queue_size=10)
+
 past_an = 0.0
 past_ae = 0.0
 past_ad = 0.0
@@ -78,6 +80,7 @@ def update_pos(data):
     global past_de
     global past_dd
     global acceleration_bias
+    global accel_pub
 
     # unpack data
     an = data.vector.x - acceleration_bias.vector.x
@@ -86,6 +89,11 @@ def update_pos(data):
     # an = data.vector.x
     # ae = data.vector.y
     # ad = data.vector.z
+    message = Vector3Stamped()
+    message.vector.x = an
+    message.vector.y = ae
+    message.vector.z = ad
+    accel_pub.publish(message)
     delta_t = (data.header.stamp - past_time_stamp).to_sec()
 
     # Super basic filter to remove IMU output that is in high magnitude (more in Notes below)
@@ -121,16 +129,16 @@ def update_pos(data):
 #     return GetPositionResponse(past_dn, past_de, past_dd)
 
 def zeroVelocity(message):
-	global past_vn
+    global past_vn
     global past_ve
     global past_vd
 
-	if message.vector.x:
-		past_vn = 0.0
-	if message.vector.y:
-		past_ve = 0.0
-	if message.vector.z:
-		past_vd = 0.0
+    if message.vector.x:
+        past_vn = 0.0
+    if message.vector.y:
+        past_ve = 0.0
+    if message.vector.z:
+        past_vd = 0.0
 
 
 """

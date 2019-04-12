@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>ros_cv_inference</name>
+  <name>cv_inference</name>
   <version>0.0.0</version>
-  <description>The ros_cv_inference package</description>
+  <description>The cv_inference package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
