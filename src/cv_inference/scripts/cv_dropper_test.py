@@ -79,14 +79,28 @@ def cv_motors_client(angle, power):
 
 
 def step(direction):
+    global current_angle
+    power = 10
+    motor_duration = 0.25
+
     if direction == "forward":
-        pass
+        cv.cv_motors_client(current_angle, power)
+        time.sleep(motor_duration)
+        cv.cv_motors_client(current_angle, 0)
     elif direction == "backward":
-        pass
+        cv.cv_motors_client(current_angle, 0 - power)
+        time.sleep(motor_duration)
+        cv.cv_motors_client(current_angle, 0)
     elif direction == "left":
-        pass
+        cv.cv_motors_client(current_angle + 10, power)
+        current_angle += 10
+        time.sleep(motor_duration)
+        cv.cv_motors_client(current_angle, 0)
     elif direction == "right":
-        pass
+        cv.cv_motors_client(current_angle - 10 ,power)
+        current_angle -= 10
+        time.sleep(motor_duration)
+        cv.cv_motors_client(current_angle, 0)
 
 def drop_marker():
     print("Waiting for marker_dropper service")
