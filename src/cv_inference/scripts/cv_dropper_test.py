@@ -165,7 +165,11 @@ def callback(data):
                 print("I want to turn left")
                 step("left")
 
+        # Add sleep to not jam pid
+        # This is a really basic fix; snazzy one coming later
+        time.sleep(5)
         # Now Repeat
+
    except KeyboardInterrupt:
         set_disabled()
 
