@@ -14,11 +14,10 @@ import time
 # I'm trying to read Vector3 and Vector3Stamped messages over ROS
 # might have to change these a bit to make them work
 # find where the geometry_msgs folder is and look for the message declaration
-from geometry_msgs import Vector3
-from geometry_msgs import Vector3Stamped
+from geometry_msgs.msg import Vector3, Vector3Stamped
 
-desired_angle = 0
-current_angle = 0
+desired_yaw = 0
+current_yaw = 0
 frame_width = 640
 frame_height = 480
 frame_w_center = frame_width/2
@@ -59,8 +58,8 @@ def get_imuangle(data):
         float yaw;
     } NgimuEuler;
     """
-    global current_angle
-    current_angle = data.vector.y
+    global current_yaw
+    current_yaw = data.vector.y
 
 def calc_angle(object_center):
     """ Calculates the amount of angle needed to be added to the current
@@ -76,7 +75,7 @@ def calc_angle(object_center):
 def callback(data):
    rospy.loginfo(rospy.get_caller_id() + "I heard %s", data.data)
    try:
-        global desired_angle, current_angle, current_distance, frame_w_center, frame_h_center, default_power
+        global desired_yaw, current_yaw, current_distance, frame_w_center, frame_h_center, default_power
         json_data = json.loads(data.data)
         xmin = json_data['xmin']
         print("got xmin from json: " + str(xmin))
@@ -90,8 +89,8 @@ def callback(data):
         object_center = (xmax+xmin)/2
         # calculate the change in yaw that we need
         degree_displacement = calc_angle(object_center)
-        desired_angle = desired_angle + degree_displacement
-        motors_client(desired_angle, default_power)
+        desired_yaw = desired_yaw + degree_displacement
+        motors_client(desired_yaw, default_power)
    except KeyboardInterrupt:
         set_disabled()
 
