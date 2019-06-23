@@ -10,15 +10,14 @@ import rospy
 import re
 import json
 import time
-# these imports might fail
+# possible bug source
 # I'm trying to read Vector3 and Vector3Stamped messages over ROS
 # might have to change these a bit to make them work
 # find where the geometry_msgs folder is and look for the message declaration
-from geometry_msgs import Vector3
-from geometry_msgs import Vector3Stamped
+from geometry_msgs.msg import Vector3, Vector3Stamped
 
-desired_angle = 0
-current_angle = 0
+desired_yaw = 0
+current_yaw = 0
 frame_width = 640
 frame_height = 480
 frame_w_center = frame_width/2
@@ -42,10 +41,7 @@ def motors_client(angle, power):
         set_yaw_angle = rospy.ServiceProxy('motion_controller/SetYawAngle', SetYawAngle)
         m_power = set_forwards_power(power)
         m_angle = set_yaw_angle(angle)
-        m_enable = set_enabled(True)
-        if(power == 0):
-            enable = set_enabled(False)
-        return
+        # m_enable = set_enabled(True)
 
     except rospy.ServiceException, e:
         print "Service call failed: %s"%e
@@ -62,8 +58,8 @@ def get_imuangle(data):
         float yaw;
     } NgimuEuler;
     """
-    global current_angle
-    current_angle = yaw
+    global current_yaw
+    current_yaw = data.vector.y
 
 def calc_angle(object_center):
     """ Calculates the amount of angle needed to be added to the current
@@ -79,7 +75,7 @@ def calc_angle(object_center):
 def callback(data):
    rospy.loginfo(rospy.get_caller_id() + "I heard %s", data.data)
    try:
-        global desired_angle, current_angle, current_distance, frame_w_center, frame_h_center, default_power
+        global desired_yaw, current_yaw, current_distance, frame_w_center, frame_h_center, default_power
         json_data = json.loads(data.data)
         xmin = json_data['xmin']
         print("got xmin from json: " + str(xmin))
@@ -93,15 +89,16 @@ def callback(data):
         object_center = (xmax+xmin)/2
         # calculate the change in yaw that we need
         degree_displacement = calc_angle(object_center)
-        desired_angle = desired_angle + degree_displacement
-        motors_client(desired_angle, default_power)
+        desired_yaw = desired_yaw + degree_displacement
+        motors_client(desired_yaw, default_power)
    except KeyboardInterrupt:
         set_disabled()
 
 def cv_controls_test():
     try:
-        rospy.init_node('cv_Controls_Test',anonymous = True)
+        rospy.init_node('cv_controls_test',anonymous = True)
         rospy.Subscriber("cv_detection", String, callback)
+        rospy.Subscriber('ngimu/euler', Vector3Stamped, get_imuangle)
         rospy.spin()
     except rospy.ServiceException, e:
         print "Service call failed: %s"%e
